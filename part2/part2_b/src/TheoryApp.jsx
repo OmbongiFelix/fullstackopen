@@ -5,7 +5,17 @@ import personService from './services/person'
 
 const Name = ({ person }) => {
 
-  return <li>{person.name} {person.number}</li>
+  return <li>{person.name} {person.number} 
+    <button onClick= {() => removePerson(person.name, person.id)}> delete </button> 
+    </li>
+}
+
+const removePerson = (name, id) => {
+  window.confirm(`Delete ${name}`) ? personService.deletePerson(id).then(
+    () => console.log("deleted"),
+    setPersons(persons.filter(n => n.id !== id))
+  ):
+  alert("Person not deleted")
 }
 
 const Filter = (props) => {
@@ -28,6 +38,7 @@ const Persons = ({persons}) => {
       {persons.map(person => (
         <Name key={person.name} person={person} />   
       ))}
+      
     </ul>
   )
   
@@ -61,38 +72,60 @@ const App = () => {
   const [newNumber, SetNewNumber] = useState(0)
   const [searchTerm, setSearchTerm] = useState("")
   
-  useEffect(
-    () => {
-      console.log('effect')
-      axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        console.log('promise fulfilled')
-        setPersons(response.data)
+  useEffect(() => {
+    personService
+      .getAll()
+      .then(initialPeople => {
+        setPersons(initialPeople)
       })
-    }, []
-  )
+  }, [])
+  
 
   const addName = (event) => {
     event.preventDefault()
-    const nameObject = {
+    const personObject = {
       name: newName,
       number: newNumber,
-      id: String(persons.length + 1),
-       //important: Math.random() < 0.5,
+
     }
     const exists = persons.some(person => person.name === newName)
-    //console.log(newName)
-    //console.log(exists)
 
-    exists?alert(`${newName} is already added to phonebook`): setPersons(persons => [...persons, nameObject])
-    
-    //console.log(newName)
-    setNewName('')
-    SetNewNumber(0)
+
+    exists?alert(`${newName} is already added to phonebook`): 
+    personService .create(personObject)
+                  . then(returnedPerson => {
+                    setPersons(persons.concat(returnedPerson))
+                    setNewName('')
+                    SetNewNumber(0)
+                  }
+                  )
   }
 
-  
+  const updatePerson = (id, person, updatedNumber) => {
+    const person1 = persons.find(person => person.id === id) 
+    const changedPerson = {
+      ...person1,
+      number: updatedNumber
+    }
+
+    personService.updatePerson(id, changedPerson)
+    .then(
+      updatedPerson =>{
+        setPersons(
+          persons.map(person => person.id === id ? updatedPerson: person )
+        )
+      }
+    )
+    .catch(error => {
+      alert(
+        `the note '${note.content}' was already deleted from server`
+      )
+    })
+    //setPersons(persons.filter(n => n.id !== id))
+     //}
+  }
+
+
 
   const handleNameChange = (event) => {
     //console.log(event.target.value)
