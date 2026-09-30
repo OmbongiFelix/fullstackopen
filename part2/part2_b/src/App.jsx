@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import personService from './services/person'
+import {Notification, ErrorMessage} from './components/Notification'
 
-// Only components remain outside the main App component
+
 const Name = ({ person, removePerson }) => {
   return (
     <li>
@@ -64,6 +65,8 @@ const App = () => {
   const [newName, setNewName] = useState("")
   const [newNumber, SetNewNumber] = useState(0)
   const [searchTerm, setSearchTerm] = useState("")
+  const [successMessage, setSuccessMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
 
   useEffect(() => {
     personService
@@ -97,9 +100,21 @@ const App = () => {
         setPersons(persons.map(person => person.id === id ? updatedPerson : person))
         setNewName('')
         SetNewNumber(0)
+        setSuccessMessage(
+          `Updated ${updatedPerson.name}'s phone number`
+        )
+
+        setTimeout(() => {
+          setSuccessMessage(null)
+        }, 5000)
       })
       .catch(error => {
-        alert(`The information of '${personToUpdate.name}' was already deleted from server`)
+        //alert(`The information of '${personToUpdate.name}' was already deleted from server`)
+        setErrorMessage(() => `Information for ${changedPerson.name} has already been removed from the server`)
+        setTimeout( () => {
+          setErrorMessage(null)
+        }, 5000)
+        console.log(error)
         setPersons(persons.filter(n => n.id !== id))
       })
   }
@@ -125,6 +140,15 @@ const App = () => {
           setNewName('')
           SetNewNumber(0)
         })
+		.then( () => {
+			setSuccessMessage(() => `Added ${personObject.name}`)
+		    setTimeout(() => {
+              setSuccessMessage(null)
+            }, 5000)
+			
+		}
+		)
+		
     }
   }
 
@@ -143,6 +167,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+	  <Notification message={successMessage} />
+    <ErrorMessage message= {errorMessage}/>
       <div>
         filter shown with <input value={searchTerm} onChange={handleSearchTermChange} />
       </div>

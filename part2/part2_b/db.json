@@ -29,6 +29,11 @@
       "name": "Keroka",
       "number": "042041",
       "id": "SPe0qWroHDE"
+    },
+    {
+      "name": "Donald Trump",
+      "number": "08978784139",
+      "id": "MyilD_ObvKU"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
